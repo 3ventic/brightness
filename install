@@ -1,0 +1,6 @@
+#!/bin/bash
+
+go build -o brightness
+sudo chown root:root brightness
+sudo chmod u+s brightness
+sudo mv brightness /usr/local/bin/
