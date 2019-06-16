@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+
+	"github.com/mqu/go-notify"
 )
 
 const (
@@ -16,14 +18,16 @@ const (
 func main() {
 	incFlag := flag.Bool("inc", false, "increase brightness by 2%")
 	decFlag := flag.Bool("dec", false, "decrease brightness by 2%")
+	notifyFlag := flag.Bool("notify", false, "send a desktop notification with new brightness")
 	flag.Parse()
 
 	inc := incFlag != nil && *incFlag
 	dec := decFlag != nil && *decFlag
+	desktopNotify := notifyFlag != nil && *notifyFlag
 	oldBrightness := readInt64(brightnessPath)
 	maxBrightness := readInt64(maxBrightnessPath)
 	if !inc && !dec {
-		printPercentage(float64(oldBrightness), float64(maxBrightness))
+		fmt.Println(percentageString(float64(oldBrightness), float64(maxBrightness)))
 		return
 	} else if inc && dec {
 		panic("both -inc and -dec specified. Cannot determine what to do")
@@ -41,7 +45,22 @@ func main() {
 	if newBrightness > maxBrightness {
 		newBrightness = maxBrightness
 	}
-	printPercentage(float64(newBrightness), float64(maxBrightness))
+	ps := percentageString(float64(newBrightness), float64(maxBrightness))
+	fmt.Println(ps)
+	if desktopNotify && notify.Init("Brightness") {
+		n := notify.NotificationNew("Brightness", fmt.Sprintf("Changed: %s", ps), "")
+		if n == nil {
+			panic("unable to create notification")
+		}
+		notify.NotificationSetTimeout(n, 1500)
+		err := notify.NotificationShow(n)
+		if err != nil {
+			panic(err)
+		}
+
+		notify.NotificationClose(n)
+		notify.UnInit()
+	}
 	updateBrightness(newBrightness)
 }
 
@@ -67,6 +86,6 @@ func readInt64(path string) int64 {
 	return i
 }
 
-func printPercentage(current, max float64) {
-	fmt.Printf("%.2f%%\n", 100*current/max)
+func percentageString(current, max float64) string {
+	return fmt.Sprintf("%.2f%%\n", 100*current/max)
 }

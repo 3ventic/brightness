@@ -1,5 +1,6 @@
 #!/bin/bash
 
+go get github.com/mqu/go-notify
 go build -o brightness
 sudo chown root:root brightness
 sudo chmod u+s brightness
