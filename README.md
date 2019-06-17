@@ -6,7 +6,7 @@ This is a small app I wrote so I can hook up keyboard shortcuts in i3 to control
 
 ```
 ./install
-backlight # get current %
-backlight -inc # increase by 2%
-backlight -dec # decrease by 2%
+brightness # get current %
+brightness -inc # increase by 2%
+brightness -dec # decrease by 2%
 ```
